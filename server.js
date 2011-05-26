@@ -1,4 +1,5 @@
 var http = require('http');
+var dns = require('dns');
 var fs = require('fs');
 var config = require('./config/config').config;
 var mimes = require('./config/mimes').mimes;
@@ -48,7 +49,18 @@ var server = http.createServer(function (req, res) {
 			});
 		});
 	}
-}).listen(config.port, config.host);
+});
+
+dns.resolve4(config.host, function (err, addrs) {
+	if (!err) {
+		config.host = addrs[0];
+		server.listen(config.port, config.host);
+		initScreen(config.port, config.host);
+	} else {
+		server.listen(config.port, config.host);
+		initScreen(config.port, config.host);
+	}
+});
 
 var respError = function (err, res) {
 	switch (err.code) {
@@ -64,11 +76,13 @@ var respError = function (err, res) {
 		res.end('<pre>'+(err.toString())+'</pre>');
 };
 
-console.log('Yet Another Node.js Server 0.01');
-console.log('Listening at '+config.host+':'+config.port+'...\n');
-console.log('Redirections:');
+var initScreen = function (port, host) {
+	console.log('Yet Another Node.js Server');
+	console.log('Listening at '+host+':'+port+'...\n');
+	console.log('Redirections:');
 
-for (i in redirect.extensions) {
-	var ri = redirect.extensions[i];
-	console.log('\t*.'+i+' to '+ri.ip+':'+ri.port);
-}
+	for (i in redirect.extensions) {
+		var ri = redirect.extensions[i];
+		console.log('\t*.'+i+' to '+ri.ip+':'+ri.port);
+	}
+};

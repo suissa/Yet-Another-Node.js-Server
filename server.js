@@ -54,12 +54,10 @@ var server = http.createServer(function (req, res) {
 dns.resolve4(config.host, function (err, addrs) {
 	if (!err) {
 		config.host = addrs[0];
-		server.listen(config.port, config.host);
-		initScreen(config.port, config.host);
-	} else {
-		server.listen(config.port, config.host);
-		initScreen(config.port, config.host);
 	}
+	
+	server.listen(config.port, config.host);
+	initScreen(config.port, config.host);
 });
 
 var respError = function (err, res) {
